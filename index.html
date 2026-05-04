@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MATRIX_LAB_STATION</title>
+<style>
+:root {
+--hacker-green: #00ff41;
+--dark-green: #003b00;
+}
+
+body {
+background-color: #000;
+color: var(--hacker-green);
+font-family: 'Courier New', monospace;
+margin: 0;
+overflow: hidden;
+display: flex;
+flex-direction: column;
+height: 100vh;
+}
+
+/* Il Canvas della Pioggia Matrix */
+#matrix-canvas {
+position: fixed;
+top: 0;
+left: 0;
+z-index: -1; /* Resta dietro a tutto */
+opacity: 0.8;
+}
+
+.panel {
+border: 1px solid var(--hacker-green);
+background: rgba(0, 0, 0, 0.85); /* Sfondo semi-trasparente per vedere la pioggia */
+padding: 15px;
+box-shadow: 0 0 15px var(--dark-green);
+margin: 10px;
+backdrop-filter: blur(2px);
+}
+
+header { text-align: center; font-weight: bold; font-size: 1.2rem; }
+
+.main-content {
+flex-grow: 1;
+display: grid;
+grid-template-columns: 1fr;
+place-items: center;
+}
+
+.terminal-box {
+width: 80%;
+max-width: 600px;
+text-align: center;
+}
+
+.cursor { animation: blink 1s infinite; }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+/* Effetto Scanline */
+.scanlines {
+position: fixed;
+top: 0; left: 0; width: 100%; height: 100%;
+background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+background-size: 100% 4px;
+z-index: 100;
+pointer-events: none;
+}
+</style>
+</head>
+<body>
+
+<canvas id="matrix-canvas"></canvas>
+<div class="scanlines"></div>
+
+<header class="panel">
+SYSTEM_OWNER: <span id="owner-name">IL_TUO_NOME</span>_
+</header>
+
+<div class="main-content">
+<div class="panel terminal-box">
+<h1 style="font-size: 1.5rem; margin-bottom: 10px;">ACCESSO_LIVELLO_7</h1>
+<p id="typewriter"></p>
+<div style="font-size: 0.8rem; opacity: 0.6; margin-top: 20px;">
+STATUS: INTRUSIONE IN CORSO...
+<span id="percent">0</span>%
+</div>
+</div>
+</div>
+
+<footer class="panel" style="font-size: 0.7rem; text-align: center;">
+[TRACE_ROUTE: ACTIVE] [ENCRYPTION: AES-256] [IP: 127.0.0.1]
+</footer>
+
+<script>
+// --- CONFIGURAZIONE ---
+const NOME = "IL_TUO_NOME"; // <--- CAMBIA QUI
+document.getElementById('owner-name').innerText = NOME;
+
+// --- MATRIX RAIN EFFECT ---
+const canvas = document.getElementById('matrix-canvas');
+const ctx = canvas.getContext('2d');
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$+-*/=%#!!!";
+const fontSize = 16;
+const columns = canvas.width / fontSize;
+
+const rainDrops = [];
+for (let x = 0; x < columns; x++) {
+rainDrops[x] = 1;
+}
+
+const drawMatrix = () => {
+// Sfondo leggermente trasparente per l'effetto scia
+ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+ctx.fillStyle = '#0F0';
+ctx.font = fontSize + 'px monospace';
+
+for (let i = 0; i < rainDrops.length; i++) {
+// Ogni tanto inseriamo il tuo nome nella pioggia
+const text = Math.random() > 0.98 ? NOME : alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+
+ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+
+if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+rainDrops[i] = 0;
+}
+rainDrops[i]++;
+}
+};
+
+// --- EFFETTI TESTUALI ---
+let p = 0;
+setInterval(() => {
+if(p < 100) {
+p++;
+document.getElementById('percent').innerText = p;
+}
+}, 150);
+
+const msg = `Benvenuto operatore ${NOME}. Il kernel è stato patchato con successo. Segnale di bypass attivato sul nodo locale.`;
+let charIndex = 0;
+function typeWriter() {
+if (charIndex < msg.length) {
+document.getElementById("typewriter").innerHTML = msg.substring(0, charIndex + 1) + '<span class="cursor">_</span>';
+charIndex++;
+setTimeout(typeWriter, 50);
+}
+}
+
+// Avvio
+window.addEventListener('resize', () => {
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+});
+
+setInterval(drawMatrix, 30);
+typeWriter();
+</script>
+</body>
+</html>
